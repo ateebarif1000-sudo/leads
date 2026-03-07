@@ -6,7 +6,7 @@ Run these in **Supabase Dashboard → SQL Editor**, in order. Use a **new** proj
 
 ## 1. Profiles table + RLS + signup trigger (run once)
 
-Creates `profiles` (role, lead limit), RLS, and a trigger so new signups get a profile with default role **Manager** and **50** leads/month.
+Creates `profiles` (role, lead limit), RLS, and a trigger so new signups get a profile with default role **Manager** and **0** leads/month (contact admin to increase).
 
 ```sql
 -- Table to store user profile and role
@@ -46,7 +46,7 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name'),
     coalesce(new.raw_user_meta_data->>'role', 'Manager'),
-    50
+    0
   );
   return new;
 end;

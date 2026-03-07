@@ -46,7 +46,7 @@ create policy "Admins can update any profile"
   on public.profiles for update
   using ( (select role from public.profiles where id = auth.uid()) = 'Admin' );
 
--- Trigger to create profile on signup (new managers get lead_generation_limit = 50)
+-- Trigger to create profile on signup (new managers get lead_generation_limit = 0)
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
@@ -56,7 +56,7 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name'),
     coalesce(new.raw_user_meta_data->>'role', 'Manager'),
-    50
+    0
   );
   return new;
 end;
@@ -176,12 +176,12 @@ ALTER TABLE public.user_leads ADD COLUMN IF NOT EXISTS linkedin text;
 
 ```sql
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS lead_generation_limit integer;
--- New managers get 50 leads/month by default. Run the trigger update below so new signups get 50.
-ALTER TABLE public.profiles ALTER COLUMN lead_generation_limit SET DEFAULT 50;
+-- New managers get 0 leads/month by default. Run the trigger update in Query 1 so new signups get 0.
+ALTER TABLE public.profiles ALTER COLUMN lead_generation_limit SET DEFAULT 0;
 ```
 
-- `NULL` or empty = unlimited. **New users** (created by the signup trigger) get **50** unless you change the trigger.
-- **To make new signups get default 50**, update the trigger so it sets `lead_generation_limit` (see Query 1: the trigger inserts with `50` for new users). If your trigger was created before this, run the full `create or replace function public.handle_new_user() ...` from Query 1 again so it includes `lead_generation_limit = 50`.
+- `NULL` or empty = unlimited. **New users** (created by the signup trigger) get **0** unless you change the trigger.
+- **To make new signups get default 0**, update the trigger so it sets `lead_generation_limit` (see Query 1: the trigger inserts with `0` for new users). If your trigger was created before this, run the full `create or replace function public.handle_new_user() ...` from Query 1 again so it includes `lead_generation_limit = 0`.
 - A number (e.g. `50`) = that user can generate at most that many leads per calendar month; the count resets automatically at the start of each month.
 - In **Settings → Manage users**, admins see a **Lead limit /month** column and can set a number or leave it empty (unlimited). **Save** updates both Role and Lead limit.
 
