@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify your email – Sales Professional Dashboard</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(to bottom, #f8fafc, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+    .verify-page {
+      width: 100%;
+      max-width: 480px;
+      animation: verifyFadeIn 0.4s ease-out;
+    }
+    @keyframes verifyFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .verify-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+      padding: 40px;
+      border: 1px solid #e5e7eb;
+    }
+    .verify-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      border-radius: 14px;
+      color: #fff;
+    }
+    .verify-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+    .verify-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+    }
+    .verify-subtitle {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #64748b;
+      margin: 0 0 16px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .verify-body {
+      font-size: 0.9375rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0 0 28px;
+      text-align: center;
+    }
+    .verify-btn-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .verify-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #ffffff;
+      background: #2563eb;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .verify-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    }
+    .verify-btn:active {
+      transform: translateY(0);
+    }
+    .verify-hint {
+      font-size: 0.875rem;
+      color: #64748b;
+      text-align: center;
+      margin: 0 0 8px;
+    }
+    .verify-hint a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .verify-hint a:hover {
+      text-decoration: underline;
+    }
+    .verify-helper {
+      font-size: 0.8125rem;
+      color: #94a3b8;
+      text-align: center;
+      margin: 0;
+    }
+    @media (max-width: 520px) {
+      .verify-card { padding: 28px 24px; }
+      body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="verify-page">
+    <div class="verify-card">
+      <div class="verify-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </div>
+      <h1 class="verify-title">Verify your email</h1>
+      <p class="verify-subtitle">We've sent a verification link to your email address.</p>
+      <p class="verify-body">Please check your inbox and click the verification link to activate your account.</p>
+      <div class="verify-btn-wrap">
+        <a href="/login" class="verify-btn">Continue to Login</a>
+      </div>
+      <p class="verify-hint">Already verified your email? <a href="/login">Click here to sign in</a>.</p>
+      <p class="verify-helper">Didn't receive the email? Check your spam folder.</p>
+    </div>
+  </div>
+</body>
+</html>

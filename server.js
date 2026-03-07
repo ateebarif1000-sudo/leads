@@ -928,6 +928,14 @@ app.use(function (req, res, next) {
   next();
 });
 
+// Auth pages: clean URLs for verify-email and login
+app.get('/verify-email', function (req, res) {
+  res.sendFile(path.join(__dirname, 'verify-email.html'));
+});
+app.get('/login', function (req, res) {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Static files and SPA fallback
 app.use(express.static(path.join(__dirname)));
 app.get('/', function (req, res) {
