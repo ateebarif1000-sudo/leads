@@ -575,7 +575,7 @@
               }
             })
             .catch(function () {});
-        }, 10 * 60 * 1000);
+        }, 4 * 60 * 1000);
         return global.auth.getUser().then(function (user) {
           return global.auth.getRole().then(function (role) {
             setProfileUI(user, role);

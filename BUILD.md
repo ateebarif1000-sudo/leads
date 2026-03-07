@@ -201,6 +201,12 @@ The project uses an **Express server** that serves the HTML/CSS/JS and reads `.e
 - **Generate Leads / Chat / Sync does nothing or says webhook not configured**  
   Set the corresponding URLs in `.env`, restart the server (`npm start`), and reload the app.
 
+- **“Invalid session” or kicked back to login**  
+  The server could not validate your session (cookie missing, expired, or Supabase rejected the token). Try: (1) **Log out and log in again** (clears old cookies and gets fresh tokens). (2) Use the **same URL** you used to log in (e.g. if you logged in at `http://localhost:3000`, don’t open `http://127.0.0.1:3000`—cookies are per-origin). (3) If behind a **proxy/HTTPS**, ensure the server sees the correct protocol (`x-forwarded-proto: https`) so cookie options match. (4) Check **Supabase** is reachable and `SUPABASE_URL` / `SUPABASE_ANON_KEY` in `.env` are correct; restart the server after changing `.env`.
+
+- **Session dies after only a few minutes**  
+  Usually the **access token** has expired and **refresh** failed. Fix: (1) **Supabase Dashboard** → **Authentication** → **Settings** (or **Project Settings** → **Auth**). Find **JWT expiry** (or “Access token expiry”). Set it to **3600** (1 hour) or **86400** (1 day). Supabase default is 3600; if it was lowered (e.g. 300 = 5 min), the session will die quickly. (2) Ensure the **refresh token** is stored: log in, then in DevTools → Application → Cookies, check that both `leads_sid` and `leads_refresh` exist for your site. If `leads_refresh` is missing, the server cannot refresh when the access token expires—check that login response sets both cookies (no proxy stripping `Set-Cookie`). (3) The server now refreshes tokens **earlier** (when &lt; 50 min left), so you get a new token before the old one expires. Restart the server after any `.env` or Supabase change.
+
 ---
 
 ## Summary checklist

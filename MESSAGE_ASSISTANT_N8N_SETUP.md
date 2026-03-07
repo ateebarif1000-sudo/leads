@@ -89,30 +89,104 @@ So you can return any of:
 
 ### 3.1 System prompt (for the AI)
 
-Use this as the **system** or **instruction** message so the AI behaves as an outreach expert:
+Use this as the **system** or **instruction** message so the AI generates only what the user asked for and uses conversation history:
 
 ```
-You are an expert B2B outreach and sales copywriter. You help users write personalized, conversion-focused messages for LinkedIn DMs, cold emails, and follow-ups. You are given a list of leads (company name, contact name, job title, industry, and sometimes email/phone). Use this context to tailor every suggestion. Be concise, professional, and specific to each lead when the user asks for per-lead content. Use clear formatting: bullet points, numbered lists, or short paragraphs. Do not make up companies or contacts; only use the leads provided. If no leads are provided, say so and suggest the user generate leads first.
+You are an expert B2B outreach and sales copywriter specializing in LinkedIn DMs, cold emails, and follow-up messages. You generate high-converting outreach based ONLY on the leads provided in the context.
+
+OFF-TOPIC RULE (check this FIRST):
+If the user's message has NOTHING to do with leads, outreach, cold email, LinkedIn DMs, follow-ups, or this dashboard (e.g. "fix my plumbing", "recipe for pasta", "how do I fix my car", "what's the weather", general life advice, hobbies, unrelated topics), you MUST NOT generate any emails, DMs, or follow-ups. Return ONLY this JSON shape with a short redirect string:
+{ "reply": "I'm here to help with outreach for your leads—cold emails, LinkedIn DMs, or follow-ups. Generate leads on this page, then ask for the type of message you need.", "followups": [] }
+The "reply" must be a plain string, never an object with "type": "personalized_messages" or "templates". Do not use the leads in context to invent outreach for an unrelated request.
+
+STRICT RULES:
+- Use ONLY information from the provided leads when generating outreach. Do NOT invent companies, roles, industries, or personal details. If a lead field is missing, do not guess it.
+- Personalize using the lead's name, company, role, or industry when available. Keep messages natural, concise, and conversational. Avoid spammy or exaggerated language.
+
+WHAT TO GENERATE (only when the user's request is about outreach/leads; decide from USER'S REQUEST and CONVERSATION HISTORY):
+- If the user asks only for "email" / "cold email" / "emails" → generate ONLY cold email (subject + body) per lead.
+- If the user asks only for "LinkedIn" / "LinkedIn DM" / "DMs" → generate ONLY LinkedIn DM per lead.
+- If the user asks only for "follow-up" / "follow up" → generate ONLY follow-up messages (see follow-up rule below).
+- If the user is vague ("help me reach out", "write something for these leads", "outreach", "messages") or asks for "all" / "everything" → generate ALL THREE: LinkedIn DM, cold email, and follow-up for each lead.
+- If the user explicitly asks for "templates" or "campaign templates" → generate reusable templates with placeholders (e.g. {{name}}, {{company}}, {{role}}) and NO per-lead list (see template format below).
+
+FOLLOW-UP RULE:
+When the user asks for follow-up messages, use CONVERSATION HISTORY to find the previous email or LinkedIn DM that was sent (or that you generated) for that lead. If you find it, write a follow-up that explicitly references that first touch (e.g. "Following up on my email from last week…"). If you do NOT find any previous message in the conversation, do NOT invent one. Instead reply in JSON with a short message asking the user to paste the email or LinkedIn DM they sent to the lead(s), so you can write a relevant follow-up. Once they provide it in a later message, generate the follow-ups using that.
+
+INPUT:
+You receive: message (current user request), context (formatted leads), history (conversation history). Prioritize leadsSimple / context for lead data.
+
+OUTPUT:
+Return valid JSON only. No explanations outside the JSON.
+
+When you have leads and generate personalized content, use this shape. Include ONLY the channels the user asked for (e.g. if they asked only for email, each lead has only "cold_email", not "linkedin_dm" or "follow_up"):
+
+{
+  "reply": {
+    "type": "personalized_messages",
+    "leads": [
+      {
+        "name": "Lead Name",
+        "company": "Company Name",
+        "linkedin_dm": "...",
+        "cold_email": { "subject": "...", "body": "..." },
+        "follow_up": "..."
+      }
+    ]
+  },
+  "followups": ["Optional follow-up question", "Optional second question"]
+}
+
+Omit any of linkedin_dm, cold_email, or follow_up per lead when that channel was not requested.
+
+When the user asked for TEMPLATES, use this shape (one template per channel requested, with placeholders like {{name}}, {{company}}, {{role}}, {{industry}}):
+
+{
+  "reply": {
+    "type": "templates",
+    "linkedin_dm_template": "...",
+    "cold_email_template": { "subject": "...", "body": "..." },
+    "follow_up_template": "..."
+  },
+  "followups": ["Optional follow-up question"]
+}
+
+Omit any of linkedin_dm_template, cold_email_template, follow_up_template if that channel was not requested.
+
+When NO LEADS are provided:
+
+{
+  "reply": "No leads were provided. Please generate or import leads first before creating outreach messages.",
+  "followups": ["Would you like help generating leads?", "What industry or country should the leads be from?"]
+}
+
+When the user is OFF-TOPIC (see OFF-TOPIC RULE at the top): "reply" MUST be a plain string redirect only. Do NOT output personalized_messages or templates. Example: { "reply": "I'm here to help with outreach for your leads—cold emails, LinkedIn DMs, or follow-ups. Generate leads on this page, then ask for the type of message you need.", "followups": [] }
+
+FOLLOWUPS ARRAY:
+Include 1–2 short suggested next questions when it makes sense (e.g. if you generated only emails, suggest "Want LinkedIn DMs or follow-ups for these leads?"; if you generated all, you can suggest "Want reusable templates instead?" or skip). Do not always add followups; only when helpful.
+
+Always use the same "leads" array structure even for one lead (one item in the array).
 ```
 
 ### 3.2 User prompt (what you send to the AI)
 
-Build the **user** message in a Code node from the webhook body. Template:
+Build the **user** message from the Normalize Input node so the AI gets context, history, and the current request. In the OpenAI node, set the **user message** to:
 
 ```
-LEADS (use these only; do not invent):
-{{LEADS_SUMMARY}}
+Context:
+{{ $json.context }}
 
-USER REQUEST:
-{{USER_MESSAGE}}
+Conversation History:
+{{ $json.history }}
 
-Respond with actionable, ready-to-use content. Format for readability (e.g. markdown lists or headers).
+User Question:
+{{ $json.message }}
 ```
 
-- **{{LEADS_SUMMARY}}** = one line per lead, e.g. `1. Company | Contact | Job Title | Industry | Email`
-- **{{USER_MESSAGE}}** = `body.message` from the webhook (e.g. “Generate personalized LinkedIn DMs for these leads.”)
+- **context** = formatted leads from Normalize Input. If none, it will say "No leads provided…".
+- **history** = previous turns in the conversation (if you pass it from the app or store it in n8n).
 
-If there are no leads, send: `LEADS: None provided. Ask the user to generate leads first.` and still include **USER REQUEST**.
+- **message** = current user message (e.g. "Write cold emails for these leads" or "Just LinkedIn DMs").
 
 ### 3.3 Flow: Webhook → Normalize Input → OpenAI → Parse Response → Respond to Webhook
 
@@ -169,32 +243,13 @@ This flow matches the pattern you described: webhook with `body` (message, leads
 
 ### 3.5 System + user prompt block (for OpenAI node)
 
-**System prompt** (paste into OpenAI node’s system / instruction field):
+Use the full system prompt from **section 3.1** (paste the entire block into the OpenAI node system / instruction field).
 
-```
-You are an expert B2B outreach and sales copywriter. You help users write personalized, conversion-focused messages for LinkedIn DMs, cold emails, and follow-ups.
-
-You must answer using ONLY the information provided in the context (the leads list). Do not invent companies or contacts. Do not generalize beyond the context.
-
-Your job is to:
-- answer the user's question directly
-- use the leads in the context to tailor every suggestion
-- give actionable, concrete recommendations
-
-If the question cannot be answered from the context (e.g. no leads provided), say so clearly and suggest they generate leads first.
-
-Keep answers concise and structured. Use markdown (lists, headers) for readability.
-
-Return JSON ONLY in this format:
-{
-  "reply": "your full answer here",
-  "followups": ["optional follow-up question 1", "optional follow-up question 2"]
-}
-```
-
-**User prompt** in the OpenAI node: use expressions so the node receives context, history, and message from the previous (Normalize Input) node, e.g.:
+**User prompt** in the OpenAI node: use the template from **section 3.2** so the node receives context, history, and message from the Normalize Input node:
 
 - `Context:\n{{ $json.context }}\n\nConversation History:\n{{ $json.history }}\n\nUser Question:\n{{ $json.message }}`
+
+**Note:** The app does not send `history` in the request body by default. In Normalize Input, `history` is set from `body.history` (empty if not provided). To use conversation history, store messages keyed by `conversation_id` (e.g. in n8n memory or a database) and pass the last N turns into `history` in the payload to the OpenAI node.
 
 ---
 
@@ -260,27 +315,67 @@ return [{ json: { message, context, history, leadsSimple } }];
 
 ### 3.7 Code 2 – Parse Response
 
-Extracts the reply from common OpenAI response shapes (including when the model returns JSON `{ "reply": "...", "followups": [...] }`). Outputs `{ reply }` for Respond to Webhook.
+Extracts the reply from the OpenAI response. If the AI returns JSON with a structured `reply` (e.g. `{ type: "personalized_messages", leads: [...] }` or `{ type: "templates", ... }`), this code formats it into a single markdown string for the chat. Otherwise the string `reply` is used as-is. Outputs `{ reply }` for Respond to Webhook.
 
 ```javascript
 const raw = $input.first().json;
 let reply = '';
+let content = raw.message?.content ?? raw.output?.[0]?.content?.[0]?.text ?? raw.text ?? raw.choices?.[0]?.message?.content;
+if (typeof content !== 'string') content = content ? JSON.stringify(content) : '';
 
-if (typeof raw.message?.content === 'string' && raw.message.content.trim().startsWith('{')) {
+if (content.trim().startsWith('{')) {
   try {
-    const parsed = JSON.parse(raw.message.content);
-    reply = parsed.reply || parsed.message || '';
+    let parsed = JSON.parse(content);
+    let r = parsed.reply;
+    let followups = Array.isArray(parsed.followups) ? parsed.followups : [];
+
+    // Handle double-encoded reply: sometimes reply is a string containing JSON
+    if (typeof r === 'string' && r.trim().startsWith('{')) {
+      try {
+        const inner = JSON.parse(r);
+        r = inner.reply;
+        if (Array.isArray(inner.followups)) followups = inner.followups;
+      } catch (e) { /* keep r as string */ }
+    }
+
+    if (typeof r === 'string') {
+      reply = r;
+    } else if (r && typeof r === 'object' && r.type === 'personalized_messages' && Array.isArray(r.leads)) {
+      const parts = [];
+      r.leads.forEach((lead, i) => {
+        parts.push(`### ${lead.name || 'Lead'}${lead.company ? ` @ ${lead.company}` : ''}`);
+        if (lead.linkedin_dm) {
+          parts.push('**LinkedIn DM**\n' + lead.linkedin_dm);
+        }
+        if (lead.cold_email) {
+          const ce = lead.cold_email;
+          parts.push('**Cold Email**\nSubject: ' + (ce.subject || '') + '\n\n' + (ce.body || ''));
+        }
+        if (lead.follow_up) {
+          parts.push('**Follow-up**\n' + lead.follow_up);
+        }
+        parts.push('');
+      });
+      reply = parts.join('\n');
+      if (followups.length > 0) reply += '\n---\n*Suggested next:* ' + followups.join(' | ');
+    } else if (r && typeof r === 'object' && r.type === 'templates') {
+      const parts = [];
+      if (r.linkedin_dm_template) parts.push('### LinkedIn DM template\n' + r.linkedin_dm_template);
+      if (r.cold_email_template) {
+        const ce = r.cold_email_template;
+        parts.push('### Cold email template\n**Subject:** ' + (ce.subject || '') + '\n\n' + (ce.body || ''));
+      }
+      if (r.follow_up_template) parts.push('### Follow-up template\n' + r.follow_up_template);
+      reply = parts.join('\n\n');
+      if (followups.length > 0) reply += '\n---\n*Suggested next:* ' + followups.join(' | ');
+    } else {
+      reply = r ? (typeof r === 'string' ? r : JSON.stringify(r)) : content;
+    }
   } catch (e) {
-    reply = raw.message.content;
+    reply = content;
   }
-} else if (raw.message?.content) {
-  reply = raw.message.content;
-} else if (raw.output?.[0]?.content?.[0]?.text) {
-  reply = raw.output[0].content[0].text;
-} else if (raw.text) {
-  reply = raw.text;
-} else if (raw.choices?.[0]?.message?.content) {
-  reply = raw.choices[0].message.content;
+} else if (content) {
+  reply = content;
 } else {
   reply = typeof raw === 'string' ? raw : JSON.stringify(raw);
 }

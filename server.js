@@ -94,33 +94,43 @@ function getJwtExp(token) {
   }
 }
 
-/** Resolve current user: validate access token, or refresh with refresh_token cookie. Proactively refresh when token expires in < 30 min. Retry refresh once on failure. */
+// In-flight refresh deduplication: if two simultaneous requests try to refresh the
+// same refresh token, only one actually calls Supabase; the other waits for the result.
+// This prevents Supabase revoking the session when it detects the same refresh token
+// used twice (its "compromised token" protection).
+var _refreshInFlight = {};
+
+/** Resolve current user: validate access token, or refresh with refresh_token cookie.
+ *  Proactively refreshes when token expires in < 50 min.
+ *  Never retries refresh with the same token — doing so triggers Supabase's replay-attack
+ *  protection and revokes the session entirely. */
 function getAuthUser(req, res) {
   if (!supabaseAuth) return Promise.resolve(null);
   const token = getAccessToken(req);
   const refresh = getRefreshToken(req);
   const nowSec = Math.floor(Date.now() / 1000);
-  const refreshThreshold = 30 * 60; // refresh if expires in less than 30 min
+  const refreshThreshold = 50 * 60;
 
   function tryRefresh() {
     if (!refresh) return Promise.resolve(null);
-    return supabaseAuth.auth.refreshSession({ refresh_token: refresh })
+    // If another request is already refreshing the same token, reuse that promise
+    if (_refreshInFlight[refresh]) return _refreshInFlight[refresh];
+    const promise = supabaseAuth.auth.refreshSession({ refresh_token: refresh })
       .then(function (_ref) {
         const data = _ref.data;
         const err = _ref.error;
+        delete _refreshInFlight[refresh];
         if (err || !data || !data.session) return null;
         const session = data.session;
         setAuthCookies(res, session.access_token, session.refresh_token || undefined, req);
         return data.user ? { user: data.user } : null;
       })
-      .catch(function () { return null; });
-  }
-
-  function tryRefreshWithRetry() {
-    return tryRefresh().then(function (auth) {
-      if (auth) return auth;
-      return tryRefresh();
-    });
+      .catch(function () {
+        delete _refreshInFlight[refresh];
+        return null;
+      });
+    _refreshInFlight[refresh] = promise;
+    return promise;
   }
 
   if (token) {
@@ -131,15 +141,15 @@ function getAuthUser(req, res) {
         if (!err && data && data.user) {
           const exp = getJwtExp(token);
           if (exp && (exp - nowSec) < refreshThreshold) {
-            return tryRefreshWithRetry();
+            return tryRefresh();
           }
           return { user: data.user };
         }
-        return tryRefreshWithRetry();
+        return tryRefresh();
       })
-      .catch(function () { return tryRefreshWithRetry(); });
+      .catch(function () { return tryRefresh(); });
   }
-  return tryRefreshWithRetry();
+  return tryRefresh();
 }
 
 function resolveRole(adminClient, userId) {

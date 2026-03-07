@@ -7,7 +7,7 @@ This guide explains how to build the **AI Chatbot Assistant** in n8n so it power
 ## 1. What the dashboard sends and expects
 
 - **Webhook URL:** Set in `.env` as `N8N_CHATBOT_WEBHOOK` (e.g. `https://your-n8n.com/webhook/chatbot`).
-- **Request:** The dashboard sends a **POST** with JSON body:
+- **Request:** The dashboard sends a **POST** with JSON body. The user can type **anything** in the chat; that text is sent as `message` to your webhook.
   ```json
   {
     "message": "How can I generate real estate leads?",
@@ -26,7 +26,7 @@ This guide explains how to build the **AI Chatbot Assistant** in n8n so it power
 The chatbot should act as a **Lead Generation Guide** that:
 
 - Suggests **which filters to use** (industry, country, city, company size, keywords, job title).
-- Helps choose **target industries** (e.g. Real Estate, IT Services, Healthcare).
+- Helps choose **target industries** (e.g. Real Estate, Information Technology & Services, Hospital & Health Care).
 - Recommends **job titles to target** (e.g. Owner, CTO, Managing Director).
 - Explains how to **improve lead quality** (e.g. use “Email available”, “Phone available”, narrow by country/city).
 - Gives **general lead generation advice** and answers questions about the dashboard.
@@ -70,7 +70,7 @@ Optional: use `conversation_id` and store past messages in a key-value store or 
 
 The webhook will receive:
 
-- `body.message` – user message.
+- `body.message` – **whatever the user typed** in the chat (free text). The user can ask anything; their exact input is sent to this webhook.
 - `body.conversation_id` – optional; use it if you add conversation memory later.
 
 ### 4.3 Add OpenAI node
@@ -98,7 +98,7 @@ How this dashboard works (so you can explain it when users ask):
 ---
 
 Dashboard filters available:
-- **Industry** (searchable dropdown): e.g. Marketing & Advertising, Real Estate, Financial Services, Information Technology & Services, Computer Software, SaaS, Healthcare, Legal Services, Construction, Hospitality, Restaurants, Retail, Higher Education, Non-Profit Organization Management, Government Administration, and more.
+- **Industry** (searchable field): the user can **type any industry** they want; they are not limited to the dropdown. The dropdown suggests common options (e.g. Accounting, Banking, Biotechnology, Computer Software, Construction, Events Services, Financial Services, Health, Wellness & Fitness, Higher Education, Hospital & Health Care, Information Technology & Services, Insurance, Legal Services, Logistics & Supply Chain, Management Consulting, Marketing & Advertising, Pharmaceuticals, Real Estate, Restaurants, Retail, Staffing and Recruiting, Telecommunications). When suggesting, prefer these when they fit; if the user has a different industry in mind, they can type it.
 - **Country** (dropdown): e.g. United States, United Kingdom, Canada, Australia, etc.
 - **City** (dropdown that depends on Country): e.g. for United States → New York, Los Angeles, Chicago, etc.; for United Kingdom → London, Manchester, etc.
 - **Max results** (number): How many leads to generate (e.g. 10, 50, 100). Must not exceed the user’s remaining monthly limit.
@@ -116,7 +116,7 @@ User context to keep in mind:
 ---
 
 Guidelines for your replies:
-- Suggest **specific filter values** when the user asks about an industry or use case (e.g. Real Estate → industry "Real Estate", job titles like "Owner", "Managing Director", "Real Estate Agent"; IT services → industry "Information Technology & Services" or "Computer Software", job titles like "CTO", "IT Manager", "Head of Technology", "Founder").
+- Suggest **specific filter values** when the user asks about an industry or use case (e.g. Real Estate → industry "Real Estate", job titles like "Owner", "Managing Director", "Real Estate Agent"; IT services → industry "Information Technology & Services" or "Computer Software", job titles like "CTO", "IT Manager", "Head of Technology", "Founder"). Remind users they can type their own industry in the field if they don’t see it in the list.
 - For job titles, recommend roles that match the goal (e.g. healthcare → Practice Manager, Director; marketing → Marketing Manager, Owner).
 - Recommend narrowing by **Country** or **City** when it helps targeting (e.g. "For US real estate, select United States and a state/city like Texas or New York").
 - Suggest **Email available** and **Phone available** when the user wants higher-quality, contactable leads.
@@ -152,7 +152,7 @@ If your Webhook is set to “Respond when last node runs”, the workflow’s la
 | “How can I generate real estate leads?” | Suggest industry “Real Estate”, job titles like Owner, Managing Director, Real Estate Agent; suggest filtering by country/city if relevant. |
 | “Which job titles should I target for IT services?” | Suggest CTO, IT Manager, Head of Technology, Founder (for smaller companies); industry “Information Technology & Services” or “Computer Software”. |
 | “How do I get better quality leads?” | Suggest “Email available” and “Phone available”, narrowing by industry/job title, and maybe country/city. |
-| “What filters do you recommend for healthcare?” | Suggest Health-related industry (e.g. Health, Wellness & Fitness, Medical Practice), job titles (e.g. Practice Manager, Director), and optional country/city. |
+| “What filters do you recommend for healthcare?” | Suggest Health-related industry (e.g. Health, Wellness & Fitness, Hospital & Health Care), job titles (e.g. Practice Manager, Director), and optional country/city. |
 | “How do I send leads to HubSpot?” | Explain: select leads with checkboxes, click “Sync to HubSpot”; the app sends them to n8n to create companies and contacts (admin must set up the HubSpot sync workflow and webhook). |
 | “How do I export my leads?” | Explain: select leads (or leave all selected) and click “Export to CSV” to download the list. |
 | “I don’t have much time to qualify leads” (pain point) | Acknowledge time constraint; suggest “Email available” and “Phone available”, narrow industry/job title, and maybe one country to reduce noise. |
