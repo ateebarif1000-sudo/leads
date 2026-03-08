@@ -34,9 +34,21 @@ html {
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg);
+  background: linear-gradient(to bottom, #f8fafc, #eef2f7);
   color: var(--text);
   line-height: 1.5;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ----- Auth page ----- */
@@ -571,15 +583,17 @@ body {
 /* ----- Cards ----- */
 .card {
   background: var(--card-bg);
-  border-radius: var(--radius);
+  border-radius: 14px;
   box-shadow: var(--card-shadow);
-  padding: 1.5rem;
+  padding: 1.75rem;
   margin-bottom: 1.5rem;
-  transition: box-shadow var(--transition);
+  border: 1px solid var(--border);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .card:hover {
-  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-6px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
 }
 
 .card-title {
@@ -589,22 +603,67 @@ body {
   color: var(--text);
 }
 
+/* Section titles with icons (About us) */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-icon {
+  font-size: 22px;
+}
+
 .about-list {
   margin: 0;
-  padding-left: 1.25rem;
-  list-style: disc;
+  padding-left: 0;
+  list-style: none;
 }
 .about-list li {
+  position: relative;
+  padding-left: 18px;
   margin-bottom: 0.75rem;
   line-height: 1.5;
   color: var(--text-muted, #64748b);
   font-size: 0.9375rem;
+}
+.about-list li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  position: absolute;
+  left: 0;
+  top: 10px;
 }
 .about-list li:last-child {
   margin-bottom: 0;
 }
 .about-list strong {
   color: var(--text, #0f172a);
+}
+
+/* Contact links (About us) */
+.contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 0.5rem;
+}
+.contact-link {
+  display: inline-block;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.contact-link:hover {
+  transform: translateY(-2px);
+  background: var(--primary-hover);
 }
 
 /* ----- Stats ----- */
