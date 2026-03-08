@@ -589,6 +589,24 @@ body {
   color: var(--text);
 }
 
+.about-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.about-list li {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted, #64748b);
+  font-size: 0.9375rem;
+}
+.about-list li:last-child {
+  margin-bottom: 0;
+}
+.about-list strong {
+  color: var(--text, #0f172a);
+}
+
 /* ----- Stats ----- */
 .stats-grid {
   display: grid;
