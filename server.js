@@ -518,6 +518,31 @@ app.get('/api/lead-limit', function (req, res) {
   });
 });
 
+// GET /api/stats — dashboard stats for current user (e.g. exported total, synced across devices)
+app.get('/api/stats', function (req, res) {
+  if (!supabaseAdmin) return res.status(503).json({ error: 'Supabase not configured' });
+  requireUser(req, res, function (user) {
+    if (res.headersSent) return;
+    supabaseAdmin.from('activity_log')
+      .select('action, details')
+      .eq('user_id', user.id)
+      .eq('action', 'export_csv')
+      .then(function (r) {
+        if (r.error) return res.status(500).json({ error: r.error.message });
+        var rows = r.data || [];
+        var exportedTotal = rows.reduce(function (sum, row) {
+          var d = row.details;
+          var n = d && typeof d.count === 'number' ? d.count : 0;
+          return sum + n;
+        }, 0);
+        res.json({ exportedTotal: exportedTotal });
+      })
+      .catch(function () {
+        if (!res.headersSent) res.status(500).json({ error: 'Server error' });
+      });
+  });
+});
+
 // ---------- API: leads (per-user history) ----------
 
 function leadToRow(userId, lead) {

@@ -191,14 +191,26 @@
     if (elToday) elToday.textContent = generatedToday > 0 ? String(generatedToday) : '—';
     if (elSynced) elSynced.textContent = syncedCount > 0 ? String(syncedCount) : '—';
     if (elExported) {
-      global.auth.getUser().then(function (user) {
-        var key = user && user.id ? 'leads_linked_export_total_' + user.id : null;
-        var exportedTotal = 0;
-        try {
-          if (key) exportedTotal = parseInt(localStorage.getItem(key) || '0', 10);
-        } catch (e) {}
-        elExported.textContent = exportedTotal > 0 ? String(exportedTotal) : '—';
-      });
+      fetch('/api/stats', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var exportedTotal = (data && typeof data.exportedTotal === 'number') ? data.exportedTotal : 0;
+          elExported.textContent = exportedTotal > 0 ? String(exportedTotal) : '—';
+        })
+        .catch(function () {
+          if (!global.auth || !global.auth.getUser) {
+            elExported.textContent = '—';
+            return;
+          }
+          global.auth.getUser().then(function (user) {
+            var key = user && user.id ? 'leads_linked_export_total_' + user.id : null;
+            var exportedTotal = 0;
+            try {
+              if (key) exportedTotal = parseInt(localStorage.getItem(key) || '0', 10);
+            } catch (e) {}
+            elExported.textContent = exportedTotal > 0 ? String(exportedTotal) : '—';
+          });
+        });
     }
     renderActivityChart();
   }
