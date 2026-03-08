@@ -535,12 +535,13 @@
   }
 
   function exportCSVFromGenerate() {
-    if (lastGeneratedLeads.length === 0) {
+    var toExport = getSelectedGenerateLeads();
+    if (toExport.length === 0) {
       if (global.utils && global.utils.toast) global.utils.toast('No results to export', 'info');
       return;
     }
     var cols = ['companyName', 'companyDomain', 'contactName', 'jobTitle', 'industry', 'email', 'phone', 'linkedin', 'country', 'status'];
-    var csv = global.utils && global.utils.toCSV ? global.utils.toCSV(lastGeneratedLeads, cols) : '';
+    var csv = global.utils && global.utils.toCSV ? global.utils.toCSV(toExport, cols) : '';
     if (!csv) {
       if (global.utils && global.utils.toast) global.utils.toast('No data to export', 'info');
       return;
@@ -549,18 +550,23 @@
     if (global.utils && global.utils.downloadBlob) {
       global.utils.downloadBlob(blob, 'leads-generated-' + new Date().toISOString().slice(0, 10) + '.csv');
     }
-    if (global.logActivity) global.logActivity('export_csv', { count: lastGeneratedLeads.length, leads: lastGeneratedLeads.slice(0, 50) });
-    addToExportTotal(lastGeneratedLeads.length);
+    if (global.logActivity) global.logActivity('export_csv', { count: toExport.length, leads: toExport.slice(0, 50) });
+    addToExportTotal(toExport.length);
     if (global.utils && global.utils.toast) global.utils.toast('CSV exported', 'success');
   }
 
   function addToExportTotal(count) {
     if (count <= 0) return;
-    try {
-      var prev = parseInt(localStorage.getItem('leads_linked_export_total') || '0', 10);
-      localStorage.setItem('leads_linked_export_total', String(prev + count));
-      if (global.app && global.app.updateDashboardStats) global.app.updateDashboardStats();
-    } catch (e) {}
+    if (!global.auth || !global.auth.getUser) return;
+    global.auth.getUser().then(function (user) {
+      if (!user || !user.id) return;
+      try {
+        var key = 'leads_linked_export_total_' + user.id;
+        var prev = parseInt(localStorage.getItem(key) || '0', 10);
+        localStorage.setItem(key, String(prev + count));
+        if (global.app && global.app.updateDashboardStats) global.app.updateDashboardStats();
+      } catch (e) {}
+    });
   }
 
   function withButtonLoading(btn, fn) {

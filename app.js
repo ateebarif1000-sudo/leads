@@ -191,18 +191,23 @@
       return t >= todayStart;
     }).length;
     var syncedCount = allLeads.filter(function (l) { return l.status === 'Synced'; }).length;
-    var exportedTotal = 0;
-    try {
-      exportedTotal = parseInt(localStorage.getItem('leads_linked_export_total') || '0', 10);
-    } catch (e) {}
     var elTotal = document.getElementById('stat-total-leads');
     var elToday = document.getElementById('stat-today');
     var elExported = document.getElementById('stat-exported');
     var elSynced = document.getElementById('stat-synced');
     if (elTotal) elTotal.textContent = total;
     if (elToday) elToday.textContent = generatedToday > 0 ? String(generatedToday) : '—';
-    if (elExported) elExported.textContent = exportedTotal > 0 ? String(exportedTotal) : '—';
     if (elSynced) elSynced.textContent = syncedCount > 0 ? String(syncedCount) : '—';
+    if (elExported) {
+      global.auth.getUser().then(function (user) {
+        var key = user && user.id ? 'leads_linked_export_total_' + user.id : null;
+        var exportedTotal = 0;
+        try {
+          if (key) exportedTotal = parseInt(localStorage.getItem(key) || '0', 10);
+        } catch (e) {}
+        elExported.textContent = exportedTotal > 0 ? String(exportedTotal) : '—';
+      });
+    }
     renderActivityChart();
   }
 
