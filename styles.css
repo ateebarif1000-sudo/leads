@@ -1233,9 +1233,24 @@ body {
   display: flex;
 }
 
-.page-pricing-wrap .page-title {
-  align-self: flex-start;
+.pricing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+  max-width: 1100px;
   margin-bottom: 2rem;
+}
+
+.page-pricing-wrap .pricing-header .page-title {
+  margin: 0;
+}
+
+.pricing-contact-top {
+  text-align: right;
+  margin: 0;
 }
 
 .pricing-grid {
