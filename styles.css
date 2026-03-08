@@ -358,6 +358,10 @@ body {
   width: 70px;
 }
 
+.sidebar.collapsed .logo {
+  display: none;
+}
+
 .sidebar.collapsed .logo-text {
   display: none;
 }
@@ -374,6 +378,19 @@ body {
   margin-right: 0;
 }
 
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  transform: rotate(180deg);
+  margin: 0 auto;
+}
+
+.sidebar.collapsed .sidebar-toggle:hover {
+  transform: rotate(180deg) scale(1.1);
+}
+
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -382,11 +399,19 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.sidebar-brand {
+.logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
   min-width: 0;
+}
+
+.logo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle {
@@ -398,6 +423,7 @@ body {
   border: none;
   cursor: pointer;
   color: var(--text);
+  font-size: 18px;
   border-radius: var(--radius-sm);
   opacity: 0.7;
   transition: all 0.25s ease;
@@ -406,14 +432,6 @@ body {
 .sidebar-toggle:hover {
   opacity: 1;
   transform: scale(1.1);
-}
-
-.sidebar.collapsed .sidebar-toggle {
-  transform: rotate(180deg);
-}
-
-.sidebar.collapsed .sidebar-toggle:hover {
-  transform: rotate(180deg) scale(1.1);
 }
 
 .sidebar-logo {
