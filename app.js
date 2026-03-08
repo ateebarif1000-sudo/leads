@@ -56,29 +56,22 @@
   function initSidebar() {
     var sidebar = document.getElementById('sidebar');
     var toggle = document.getElementById('sidebar-toggle');
-    var toggleIcon = document.getElementById('sidebar-toggle-icon');
-
-    function setToggleIcon() {
-      if (!toggle || !toggleIcon || !sidebar) return;
-      var isMobile = window.innerWidth <= 768;
-      var isOpen = isMobile ? sidebar.classList.contains('open') : !sidebar.classList.contains('is-hidden');
-      toggleIcon.innerHTML = isOpen
-        ? '<polyline points="15 18 9 12 15 6"></polyline>'   // chevron-left (close)
-        : '<polyline points="9 18 15 12 9 6"></polyline>';   // chevron-right (open)
-      toggle.setAttribute('aria-label', isOpen ? 'Hide sidebar' : 'Show sidebar');
-      toggle.setAttribute('title', isOpen ? 'Hide sidebar' : 'Show sidebar');
-    }
+    var openMobile = document.getElementById('sidebar-open-mobile');
 
     if (toggle && sidebar) {
       toggle.addEventListener('click', function () {
         if (window.innerWidth <= 768) {
-          sidebar.classList.toggle('open');
+          sidebar.classList.remove('open');
         } else {
-          sidebar.classList.toggle('is-hidden');
+          sidebar.classList.toggle('collapsed');
         }
-        setToggleIcon();
       });
-      setToggleIcon();
+    }
+
+    if (openMobile && sidebar) {
+      openMobile.addEventListener('click', function () {
+        sidebar.classList.add('open');
+      });
     }
 
     document.querySelectorAll('.nav-item').forEach(function (item) {
@@ -87,7 +80,6 @@
         var page = item.getAttribute(PAGE_ATTR);
         if (page) showPage(page);
         if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('open');
-        setToggleIcon();
       });
     });
   }

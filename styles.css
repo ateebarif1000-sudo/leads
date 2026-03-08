@@ -351,21 +351,71 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition: width 0.25s ease, transform var(--transition), box-shadow var(--transition);
 }
 
-.sidebar-brand {
-  padding: 1.25rem;
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+.sidebar.collapsed .menu-label {
+  display: none;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin-right: 0;
+}
+
+.sidebar-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 16px;
   border-bottom: 1px solid var(--border);
 }
 
-/* Desktop sidebar open/close */
-.sidebar.is-hidden {
-  display: none;
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
 }
+
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
+  transition: all 0.25s ease;
+}
+
+.sidebar-toggle:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  transform: rotate(180deg);
+}
+
+.sidebar.collapsed .sidebar-toggle:hover {
+  transform: rotate(180deg) scale(1.1);
+}
+
 .sidebar-logo {
   width: 40px;
   height: 40px;
@@ -374,10 +424,13 @@ body {
   flex-shrink: 0;
 }
 
-.sidebar-brand span {
+.logo-text {
   font-weight: 600;
   font-size: 1.125rem;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-nav {
@@ -413,6 +466,13 @@ body {
 .nav-icon {
   display: inline-flex;
   flex-shrink: 0;
+  margin-right: 0;
+}
+
+.menu-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .main-wrap {
@@ -438,6 +498,23 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.sidebar-open-mobile {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  border-radius: 8px;
+  transition: background-color var(--transition);
+}
+
+.sidebar-open-mobile:hover {
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .topbar-right {
@@ -2096,8 +2173,8 @@ body.modal-open {
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
   }
 
-  .sidebar-toggle {
-    display: block;
+  .sidebar-open-mobile {
+    display: inline-flex;
   }
 
   .stats-grid {
