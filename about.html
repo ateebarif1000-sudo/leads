@@ -205,43 +205,61 @@
     .fade-left.visible { opacity: 1; transform: translateX(0); }
     .fade-right.visible { opacity: 1; transform: translateX(0); }
 
-    /* Features – horizontal rows */
+    /* Features – grid rows (Stripe/Linear style) */
     .about-features {
       max-width: 720px;
       margin: 0 auto;
     }
     .feature-row {
-      display: flex;
-      gap: 24px;
-      padding: 28px 0;
+      display: grid;
+      grid-template-columns: 40px 220px 1fr;
+      align-items: start;
+      gap: 16px;
+      padding: 30px 0;
       border-bottom: 1px solid #e2e8f0;
       opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      transform: translateX(-40px);
+      transition: all 0.6s ease;
     }
     .feature-row:last-child {
       border-bottom: none;
     }
-    .feature-row.visible {
+    .feature-row.show {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0);
     }
     .feature-icon {
-      font-size: 28px;
+      font-size: 26px;
       line-height: 1;
-      flex-shrink: 0;
     }
-    .feature-content h3 {
-      font-size: 20px;
-      margin: 0 0 6px;
+    .feature-title {
+      font-size: 18px;
       font-weight: 600;
       color: var(--text);
+      margin: 0;
     }
-    .feature-content p {
+    .feature-desc {
       margin: 0;
       font-size: 0.9375rem;
       color: #64748b;
       line-height: 1.6;
+    }
+    @media (max-width: 640px) {
+      .feature-row {
+        grid-template-columns: 40px 1fr;
+        grid-template-rows: auto auto;
+      }
+      .feature-icon {
+        grid-row: 1 / -1;
+      }
+      .feature-title {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .feature-desc {
+        grid-column: 2;
+        grid-row: 2;
+      }
     }
 
     /* Offer rows – editorial style */
@@ -335,40 +353,30 @@
           <h2 class="about-section-title">Features</h2>
         </div>
         <div class="about-features">
-          <div class="feature-row" data-animate>
+          <div class="feature-row">
             <span class="feature-icon" aria-hidden="true">🔎</span>
-            <div class="feature-content">
-              <h3>Lead generation</h3>
-              <p>Generate leads using filters like industry, location, company size and job titles.</p>
-            </div>
+            <h3 class="feature-title">Lead generation</h3>
+            <p class="feature-desc">Generate leads using filters like industry, location, company size and job titles.</p>
           </div>
-          <div class="feature-row" data-animate>
+          <div class="feature-row">
             <span class="feature-icon" aria-hidden="true">📄</span>
-            <div class="feature-content">
-              <h3>Export to CSV</h3>
-              <p>Select leads and export them for use in other tools.</p>
-            </div>
+            <h3 class="feature-title">Export to CSV</h3>
+            <p class="feature-desc">Select leads and export them for use in other tools.</p>
           </div>
-          <div class="feature-row" data-animate>
+          <div class="feature-row">
             <span class="feature-icon" aria-hidden="true">🤖</span>
-            <div class="feature-content">
-              <h3>AI Lead Gen Assistant</h3>
-              <p>Get advice on filters, industries, job titles, and how the dashboard works.</p>
-            </div>
+            <h3 class="feature-title">AI Lead Gen Assistant</h3>
+            <p class="feature-desc">Get advice on filters, industries, job titles and prospecting strategy.</p>
           </div>
-          <div class="feature-row" data-animate>
+          <div class="feature-row">
             <span class="feature-icon" aria-hidden="true">✉️</span>
-            <div class="feature-content">
-              <h3>Message Assistant</h3>
-              <p>Get personalized cold emails, LinkedIn DMs, and follow-up messages for your leads or reusable templates.</p>
-            </div>
+            <h3 class="feature-title">Message Assistant</h3>
+            <p class="feature-desc">Generate personalized cold emails and LinkedIn messages.</p>
           </div>
-          <div class="feature-row" data-animate>
+          <div class="feature-row">
             <span class="feature-icon" aria-hidden="true">📊</span>
-            <div class="feature-content">
-              <h3>Dashboard &amp; settings</h3>
-              <p>View stats, manage your account, and for admins manage users and roles.</p>
-            </div>
+            <h3 class="feature-title">Dashboard &amp; Settings</h3>
+            <p class="feature-desc">Track stats, manage your account and user roles.</p>
           </div>
         </div>
       </section>
@@ -431,8 +439,6 @@
           var el = entry.target;
           var on = entry.isIntersecting;
           setVisible(el, on);
-          var featureRows = el.querySelectorAll('.feature-row[data-animate]');
-          if (featureRows.length) runStaggered(featureRows, 100, on);
           var offerRows = el.querySelectorAll('.about-offer-row');
           if (offerRows.length) runStaggered(offerRows, 80, on);
           var contact = el.querySelector('.about-contact-box[data-animate]');
@@ -441,6 +447,14 @@
       }, opts);
       document.querySelectorAll('.fade-up, .fade-left, .fade-right').forEach(function (el) { io.observe(el); });
       document.querySelectorAll('.about-section').forEach(function (s) { io.observe(s); });
+
+      var featureObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) entry.target.classList.add('show');
+          else entry.target.classList.remove('show');
+        });
+      }, { threshold: 0.2 });
+      document.querySelectorAll('.feature-row').forEach(function (el) { featureObserver.observe(el); });
 
       var mx = 0, my = 0, tx = 0, ty = 0;
       document.addEventListener('mousemove', function (e) {
