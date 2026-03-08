@@ -42,17 +42,20 @@
 
   <div class="main-wrap">
     <header class="topbar">
-      <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Hide sidebar" title="Hide sidebar">
-        <svg id="sidebar-toggle-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-      <div class="topbar-spacer"></div>
-      <div class="topbar-actions">
-        <a href="about.html" class="topbar-about-btn">About</a>
+      <div class="topbar-left">
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Hide sidebar" title="Hide sidebar">
+          <svg id="sidebar-toggle-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <a href="about.html" class="about-link topbar-item">
+          <span class="about-link-icon" aria-hidden="true">←</span> About
+        </a>
+      </div>
+      <div class="topbar-right">
         <span class="role-badge" id="role-badge">—</span>
         <div class="profile-menu">
-          <button type="button" class="profile-trigger" id="profile-trigger" aria-haspopup="true" aria-expanded="false">
+          <button type="button" class="profile-trigger profile topbar-item" id="profile-trigger" aria-haspopup="true" aria-expanded="false">
             <span class="profile-avatar" id="profile-avatar">?</span>
             <span class="profile-email" id="profile-email">Loading…</span>
             <svg class="profile-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
